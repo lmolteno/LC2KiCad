@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 import requests
+import json
 import os
 import sys
 
 def printerr(instr, **kwargs):
     print(f"\033[1;31m{instr}\033[39m\033[0m", **kwargs)
 
-def insert_footprint(footprint_file):
+def insert_footprint(footprint):
     # F2 "" 0 0 50 H I C CNN
     # F2 "digikey-footprints:LED_RGB_WP154A4SUREQBFZGC" 200 200 60 H I L C N N
-    footprint = footprint_file[:-10]
     return f"F2 \"LCSC:{footprint}\" 200 200 60 H I L C N N\n"
 
 def insert_datasheet(lcsc_pn):
@@ -58,8 +58,14 @@ for lcsc_uuid in results['result'][:1]:
 
     if len(newfootl) == 0:
         # Footprint already exists
+        # Search in /tmp/component.json to see if one can find the name of it.
         newfoot = ""
-    else: newfoot = newfootl[0]
+        with open("/tmp/component.json") as f:
+            r = json.load(f)
+            newfoot = r['result']['packageDetail']['title']
+            print(f"Footprint already exists: {newfoot}")
+
+    else: newfoot = newfootl[0][:-10] # cut off .kicad_mod
 
     partname = ""
 
@@ -110,7 +116,7 @@ for lcsc_uuid in results['result'][:1]:
             "S": 5,
             "T": 6,
             "B": 2,
-            "X": -4
+            "X": 9 
         }
 
         for idx, lib in enumerate(newlibl):
@@ -121,7 +127,7 @@ for lcsc_uuid in results['result'][:1]:
                         line = line.split()
                         subpartnum = part_idx_loc[line[0]]
                         line[subpartnum] = str(idx)
-                        line[subpartnum+1] = str(idx) # de morgan shape
+                        line[subpartnum+1] = '1' # alternate de morgan shape (both)
                         line = " ".join(line)
                         lines.append(line.strip())
         
