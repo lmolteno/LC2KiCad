@@ -10,7 +10,7 @@
 
 LC2KiCad is a software that is designed to be able to convert documents of EasyEDA (or aka. LCEDA, since it's owned by LCSC) to documents of KiCad 5.0 or higher. It is completely free, main part of code is licensed under GNU LGPL v3 license.
 
-**LC2KiCad is no longer in active development, and its feature is incomplete.*** Only schematic symbols, PCB footprints and PCBs are supported.
+**LC2KiCad is no longer in active development, and its feature is incomplete.** Only schematic symbols, PCB footprints and PCBs are supported.
 
 A newly created browser plugin can be used to extract footprints, symbols and 3D models may be interesting to you. Link: [lckiconverter](https://github.com/xtoolbox/lckiconverter)
 
@@ -35,6 +35,10 @@ cmake .. && make -j 8
 ```
 
 The compiled executable is right in `lc2kicad/build/`.
+Running `sudo make install` from the build directory will install to `/usr/local/bin`. This can be changed by adding `-DCMAKE_INSTALL_PREFIX:PATH=<new_path>` to the cmake command. I used `~/.local/bin`, as this had already been added to my `PATH` for other reasons.
+
+To use the `lcsc_convert.py` script, I linked this to my local bin directory (`ln lcsc_convert.py ~/.local/bin`, make sure to `chmod +x` if not already executable). 
+
 
 ### Windows
 
@@ -62,7 +66,7 @@ No macOS compilation has been done. But things should be similar to Linux enviro
 
 - **LC2KiCad is still working in progress, dleverything listed here are subject to change. Program might not work as how this part described. NO WARRANTY IS GUARANTEED.**
 
-  
+
 ### Usable commands
 - `lc2kicad`  Without an argument, the help message will be displayed.
 
@@ -89,7 +93,10 @@ No macOS compilation has been done. But things should be similar to Linux enviro
 
 If LC2KiCad cannot open a new file to write into, it will write everything into the standard output stream.
 
-**To be filled with other information**
+### `lcsc_convert.py` usage
+`lcsc_convert.py <LCSC Part number>` for example C131042.
+
+This will call `lc2kicad` on a JSON file downloaded from easyeda, and extract symbols and footprints, with now added support for subparts. It will then either create or append the newly created symbol to a file in the local directory called `LCSC.lib`, which can be imported into KiCAD through the symbol library manager. The footprint referenced in the library is also created in the same directory, so it's recommended to point KiCAD to this directory as the directory containing footprints as well (footprint library manager). Maybe somewhere down the line, 3D models will also be supported.
 
 ---
 
