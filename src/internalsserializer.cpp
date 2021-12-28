@@ -98,7 +98,16 @@ namespace lc2kicad
     assertThrow(head.HasMember("c_para"), "\"c_para\" not found.");
     assertThrow(head["c_para"].IsObject(), "Invalid \"c_para\" type: not object.");
     Value &headlist = head["c_para"];
-    symbolName = headlist.HasMember("name") ? headlist["name"].IsString() ? headlist["name"].GetString() : "" : "";\
+    if (headlist.HasMember("name") && headlist["name"].IsString()) {
+      symbolName = headlist["name"].GetString();
+    } else {
+      symbolName = "";
+    }
+
+    if (headlist.HasMember("subpart_no") && headlist["subpart_no"].IsString()) {
+      symbolName.append(".sp");
+      symbolName.append(headlist["subpart_no"].GetString());
+    }
 
     for(unsigned int i = 0; i < shape.Size(); i++)
       shapesList.push_back(shape[i].GetString());
@@ -397,6 +406,7 @@ namespace lc2kicad
 
   void LCJSONSerializer::parsePCBLibComponent(vector<string> &shapesList, vector<EDAElement*> &containedElements)
   {
+    int num_fillregions = 0;
     for(auto &i : shapesList)
     {
       // vector<string> parameters = splitString(shapesList[i], '~');
@@ -479,7 +489,7 @@ namespace lc2kicad
           switch(i[1])
           {
             case 'V': // SVGNODE
-              Error("An SVGNODE object has been discarded.");
+              Warn("An SVGNODE object has been discarded.");
               break;
             case 'O': // Solidregion
               if(!processingModule)
@@ -497,9 +507,10 @@ namespace lc2kicad
               }
               else
               {
-                Error(loadNthSeparated(i, '~', 5) +
-                      ": A fill region was found inside a footprint, which is not allowed in KiCad. "
-                      "This region is discarded!");
+                //Error(loadNthSeparated(i, '~', 5) +
+                //      ": A fill region was found inside a footprint, which is not allowed in KiCad. "
+                //      "This region is discarded!");
+                num_fillregions++;
                 // Can we move the region into main board? Probably not, cause we can't.
                 // That's how LC2KiCad was constructed. You can't put an element into board,
                 // because we can only see the containedElements of the footprint in this function.
@@ -517,6 +528,7 @@ namespace lc2kicad
           assertThrow(false, "Invalid element string <<<" + i + ">>>.");
       }
     }
+    Warn(std::to_string(num_fillregions) + " fill regions found and discarded.");
   }
 
   void LCJSONSerializer::parseCommonDoucmentStructure(rapidjson::Document &parseTarget,

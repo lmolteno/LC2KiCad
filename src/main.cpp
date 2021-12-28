@@ -129,11 +129,11 @@ int main(int argc, const char** argv)
       core.deserializeFile(i, &path), delete i;
   }
 
-  cerr << endl;
-  if(errorCount | warningCount)
-    Warn(string("Error(s): ") + to_string(errorCount) + ", warning(s): " + to_string(warningCount) + ".");
-  else
-    cerr << "Error(s): " << errorCount << ", warning(s): " << warningCount << ".\n";
+  //cerr << endl;
+  //if(errorCount | warningCount)
+  //  Warn(string("Error(s): ") + to_string(errorCount) + ", warning(s): " + to_string(warningCount) + ".");
+  //else
+  //  cerr << "Error(s): " << errorCount << ", warning(s): " << warningCount << ".\n";
 
   return 0;
 }

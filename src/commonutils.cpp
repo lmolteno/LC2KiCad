@@ -239,7 +239,7 @@ namespace lc2kicad
     std::cerr << "Error: " << s << std::endl;
     SetConsoleTextAttribute(hStdOut, consoleInfo.wAttributes);
 #else
-    std::cerr << "\033[1;31mError: " << s << "\033[39m\n";
+    std::cerr << "\033[1;31mError: " << s << "\033[39m\033[0m\n";
 #endif
     errorCount++;
   }
@@ -253,7 +253,7 @@ namespace lc2kicad
     std::cerr << "Warning: " << s << std::endl;
     SetConsoleTextAttribute(hStdOut, consoleInfo.wAttributes);
 #else
-    std::cerr << "\033[1;93mWarning: " << s << "\033[39m\n";
+    std::cerr << "\033[1;93mWarning: " << s << "\033[39m\033[0m\n";
 #endif
     warningCount++;
   }
@@ -267,7 +267,7 @@ namespace lc2kicad
     std::cerr << "Info: " << s << std::endl;
     SetConsoleTextAttribute(hStdOut, consoleInfo.wAttributes);
 #else
-    std::cerr << "\033[1;96mInfo: " << s << "\033[39m\n";
+    std::cerr << "\033[1;96mInfo: " << s << "\033[39m\033[0m\n";
 #endif
   }
 

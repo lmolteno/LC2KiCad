@@ -184,7 +184,37 @@ namespace lc2kicad
 
     int documentType = -1;
     // Judge the document type and do tasks accordingly.
-    if(aDocObject.HasMember("head"))
+    if (aDocObject.HasMember("result"))
+    {
+      // We must be parsing a LCSC component result
+      // It is composed of two parts: result.dataStr (which is a schematic effectively, doctype 2)
+      // result.packageDetail.dataStr (which is the PCB effectively)
+      // if there are multiple subschematics
+      if (aDocObject["result"].HasMember("subparts")) {
+        // run through subpart objects and perform extraction (mwahaha)
+        for (rapidjson::SizeType i = 0; i < aDocObject["result"]["subparts"].Size(); i++) {
+
+          rapidjson::Value &schJSON = aDocObject["result"]["subparts"][i]["dataStr"];
+          EDADocument schDocument;
+          schDocument.jsonParseResult->CopyFrom(schJSON, aBasicDocument->jsonParseResult->GetAllocator());
+          processEasyEDA6DocumentObject(aDocObject["result"]["subparts"][i]["dataStr"], &schDocument, ret);
+        }
+
+      } else {
+        rapidjson::Value &schJSON = aDocObject["result"]["dataStr"];
+        EDADocument schDocument;
+        schDocument.jsonParseResult->CopyFrom(schJSON, aBasicDocument->jsonParseResult->GetAllocator());
+
+        processEasyEDA6DocumentObject(aDocObject["result"]["dataStr"], &schDocument, ret);
+      }
+
+      rapidjson::Value &pcbJSON = aDocObject["result"]["packageDetail"]["dataStr"];
+      EDADocument pcbDocument;
+      pcbDocument.jsonParseResult->CopyFrom(pcbJSON, aBasicDocument->jsonParseResult->GetAllocator());
+      processEasyEDA6DocumentObject(aDocObject["result"]["packageDetail"]["dataStr"], &pcbDocument, ret);
+      return;
+    }
+    else if(aDocObject.HasMember("head"))
     {
       Value& head = aDocObject["head"];
       assertThrow(head.IsObject(), "Invalid \"head\" type.");
@@ -204,9 +234,6 @@ namespace lc2kicad
     }
     assertThrow((documentType >= 1 && documentType <= 7),
                 string("Unsupported document type ID ") + to_string(documentType) + ".");
-
-
-
 
     // Now decide what are we going to parse, whether schematics or PCB, anything else.
     //PCBDocument* targetDoc = new PCBDocument(targetInternalDoc); // Deprecated
@@ -297,6 +324,19 @@ namespace lc2kicad
         {
           Error("Schematics cannot be converted now. Only supports library extraction.");
         }
+        break;
+      }
+      case 6:
+      {
+        targetDocument.replace(new SchematicDocument(*aBasicDocument)); // FIXME: Do not copy JSON result around?
+        targetDocument->module = true;
+        targetDocument->containedElements.push_back(new Schematic_Module);
+
+        internalSerializer->initWorkingDocument(!targetDocument);
+        internalSerializer->parseSchLibDocument();
+        internalSerializer->deinitWorkingDocument();
+
+        ret.push_back(!++targetDocument);
         break;
       }
       default:
