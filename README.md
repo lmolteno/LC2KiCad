@@ -38,7 +38,7 @@ The compiled executable is right in `lc2kicad/build/`.
 Running `sudo make install` from the build directory will install to `/usr/local/bin`. This can be changed by adding `-DCMAKE_INSTALL_PREFIX:PATH=<new_path>` to the cmake command. I used `~/.local/bin`, as this had already been added to my `PATH` for other reasons.
 
 To use the `lcsc_convert.py` script, I linked this to my local bin directory (`ln lcsc_convert.py ~/.local/bin`, make sure to `chmod +x` if not already executable). 
-
+It relies on `wget` and having `python3` executable. It puts the temporary JSON file in `/tmp/`, so make sure that's accessible.
 
 ### Windows
 
