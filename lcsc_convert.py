@@ -14,7 +14,10 @@ def insert_footprint(footprint):
 
 def insert_datasheet(lcsc_pn):
     # F3 "http://www.ti.com/general/docs/suppproductinfo.tsp?distId=10&gotoUrl=http%3A%2F%2Fwww.ti.com%2Flit%2Fgpn%2Flmc6482" 200 300 60 H I L C N N
-    return f"F3 \"https://lcsc.com/eda_search?q={lcsc_pn}\" 200 300 60 H I L C N N"
+    return f"F3 \"https://lcsc.com/eda_search?q={lcsc_pn}\" 200 300 60 H I L C N N \"LCSC Part Number\""
+
+def insert_lcscpn(lcsc_pn):
+    return f"F4 \"{lcsc_pn}\" 200 400 60 H I L C N N"
 
 if len(sys.argv) != 2:
     printerr("Converter expects single argument, LCSC part number (e.g. C131042)")
@@ -23,6 +26,10 @@ if len(sys.argv) != 2:
 lcsc_pn = sys.argv[1] 
 uuid_link = f"https://easyeda.com/api/products/{lcsc_pn}/svgs"
 results = requests.get(uuid_link).json()
+
+if not results['success']:
+    printerr("No component found?")
+    exit()
 
 if len(results['result']) == 0:
     printerr(f"No components found with PN {lcsc_pn}")
@@ -139,8 +146,9 @@ for lcsc_uuid in results['result'][:1]:
         newlib = newlibl[0] # not dealing with subparts
         with open(newlib) as f:
             lines = f.readlines()[2:-3] # skip intro and outro
-            if "DEF" in line:
-                partname = line.split()[1]
+            for line in lines:
+                if "DEF " in line:
+                    partname = line.split()[1]
             lines = [line if "F2 " not in line else insert_footprint(newfoot) for line in lines]
             lines = [line if "F3 " not in line else insert_datasheet(lcsc_pn) for line in lines]
 

@@ -562,7 +562,7 @@ namespace lc2kicad
         *ret += "U "; break;
     }
 
-    *ret += to_string(target.fontSize) + " " + to_string(target.fontSize) + " ";
+    *ret += to_string(target.fontSize) + " " + to_string(target.fontSize/2) + " ";
     *ret += "1 0 ";
 
     //Electrical property. EasyEDA didn't split power in and power out, so power would become passive to avoid ERC violations.
